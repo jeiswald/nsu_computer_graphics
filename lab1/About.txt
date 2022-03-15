@@ -1,0 +1,3 @@
+Author Eysvald Julia 19207
+Program that implements algorithms of drawing line, shape of star
+or polygon, and also flood filling span algorithm
