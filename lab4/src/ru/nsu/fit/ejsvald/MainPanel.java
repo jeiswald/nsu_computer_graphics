@@ -2,13 +2,11 @@ package ru.nsu.fit.ejsvald;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class MainPanel extends JPanel implements MouseListener, MouseMotionListener {
+public class MainPanel extends JPanel implements MouseListener, MouseMotionListener, ComponentListener {
     private BufferedImage image;
     private final ArrayList<Coordinates> points;
     private final ArrayList<Coordinates> centerPoints;
@@ -20,15 +18,16 @@ public class MainPanel extends JPanel implements MouseListener, MouseMotionListe
     private final int bigPointRad = 11;
     private final int littlePointRad = 5;
     private int activePoint = -1;
+    private int xPressed = 0, yPressed = 0;
+    private int xShift = 0, yShift = 0;
 
 
-    public MainPanel(Dimension dimension) {
-        setPreferredSize(dimension);
+    public MainPanel() {
         addMouseListener(this);
         addMouseMotionListener(this);
-        setImage(new BufferedImage((int) dimension.getWidth(), (int) dimension.getHeight(), BufferedImage.TYPE_INT_RGB));
         points = new ArrayList<>();
         centerPoints = new ArrayList<>();
+        addComponentListener(this);
     }
 
     public void paintComponent(Graphics g) {
@@ -41,8 +40,8 @@ public class MainPanel extends JPanel implements MouseListener, MouseMotionListe
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
         g.setColor(Color.WHITE);
-        g.drawLine(image.getWidth() / 2, 0, image.getWidth() / 2, image.getHeight());
-        g.drawLine(0, image.getHeight() / 2, image.getWidth(), image.getHeight() / 2);
+        g.drawLine(xImCenter, 0, xImCenter, image.getHeight());
+        g.drawLine(0, yImCenter, image.getWidth(), yImCenter);
 
         drawPoints(image);
 
@@ -128,16 +127,31 @@ public class MainPanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     private void setImage(BufferedImage image) {
-        xImCenter = image.getHeight() / 2;
-        yImCenter = image.getWidth() / 2;
+        xImCenter = image.getWidth() / 2;
+        yImCenter = image.getHeight() / 2;
         this.image = image;
     }
 
-    public void resizePanel(Dimension dimension) {
-        setImage(new BufferedImage(dimension.width, dimension.height, BufferedImage.TYPE_INT_RGB));
-        setPreferredSize(dimension);
+    @Override
+    public void componentResized(ComponentEvent e) {
+        setImage(new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB));
         drawSpline();
         repaint();
+    }
+
+    @Override
+    public void componentMoved(ComponentEvent e) {
+
+    }
+
+    @Override
+    public void componentShown(ComponentEvent e) {
+
+    }
+
+    @Override
+    public void componentHidden(ComponentEvent e) {
+
     }
 
     @Override
@@ -172,13 +186,16 @@ public class MainPanel extends JPanel implements MouseListener, MouseMotionListe
     public void mousePressed(MouseEvent e) {
         int x = e.getX() - xImCenter;
         int y = e.getY() - yImCenter;
+        xPressed = e.getX();
+        yPressed = e.getY();
         for (int i = 0; i < points.size(); i++) {
             Coordinates point = points.get(i);
-
             if (isOverPoint(x, y, point, bigPointRad)) {
                 activePoint = i;
             }
         }
+        drawSpline();
+        repaint();
     }
 
     private boolean isOverPoint(int x, int y, Coordinates point, int pointSize) {
@@ -187,7 +204,16 @@ public class MainPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        activePoint = -1;
+        if (activePoint != -1) {
+            activePoint = -1;
+        } else {
+            xShift = e.getX() - xPressed;
+            yShift = e.getY() - yPressed;
+            xImCenter += xShift;
+            yImCenter += yShift;
+        }
+        drawSpline();
+        repaint();
     }
 
     @Override
@@ -202,14 +228,22 @@ public class MainPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseDragged(MouseEvent e) {
-
         if (activePoint != -1) {
             Coordinates point = points.get(activePoint);
             point.x = e.getX() - xImCenter;
             point.y = e.getY() - yImCenter;
             drawSpline();
             repaint();
+        } else {
+            int xShift = e.getX() - xPressed;
+            int yShift = e.getY() - yPressed;
+            xImCenter += xShift;
+            yImCenter += yShift;
+            xPressed = e.getX();
+            yPressed = e.getY();
         }
+        drawSpline();
+        repaint();
     }
 
     @Override
