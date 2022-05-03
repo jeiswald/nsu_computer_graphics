@@ -93,6 +93,10 @@ public class EditorFrame extends JDialog {
 
         applyButton.addActionListener(e ->
         {
+            if (splinePanel.getPoints().size() < 4) {
+                JOptionPane.showMessageDialog(this,"Not enough points to draw a model");
+                return;
+            }
             ModelPanel newModelPanel = new ModelPanel(splinePanel.getPoints(), settingsPanel.getmLines(),
                     settingsPanel.getLineApproxNum(), settingsPanel.getCircleApproxNum());
             newModelPanel.setPanelSize(modelFrame.getModelPanel().getSize());
