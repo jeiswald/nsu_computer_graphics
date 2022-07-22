@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 
 public class ModelPanel extends JPanel implements MouseListener, MouseMotionListener, ComponentListener,
@@ -47,6 +47,8 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
         mLines = EditorSettingsPanel.DEFAULT_M_LINES_NUM;
         lineApproxNum = EditorSettingsPanel.DEFAULT_LINE_APPROX_NUM;
         circleApproxNum = EditorSettingsPanel.DEFAULT_CIRCLE_APPROX_NUM;
+
+        Zf = shift - 20 / 2;
     }
 
     public ModelPanel(List<Coordinates> points, int mLines, int lineApproxNum, int circleApproxNum) {
@@ -123,41 +125,102 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
         g.drawLine(xImCenter, 0, xImCenter, image.getHeight());
         g.drawLine(0, yImCenter, image.getWidth(), yImCenter);
 
-        if (spline == null || spline.getSplinePoints().isEmpty()) return;
+        drawCub(20, g);
+//        if (spline == null || spline.getSplinePoints().isEmpty()) return;
+//
+//        double xAngleRad = xAngle * Math.PI / 180;
+//        double yAngleRad = yAngle * Math.PI / 180;
+//        double zAngleRad = zAngle * Math.PI / 180;
+//
+//        int maxSplineSize = spline.calcMaxSplineSize();
+//
+//        ArrayList<Coordinates> splinePoints = (ArrayList<Coordinates>) spline.getSplinePoints();
+//        ArrayList<Coordinates> edges = (ArrayList<Coordinates>) spline.getSplineEdgesCoordinates();
+//
+//        for (Coordinates point : edges) {
+//            drawCircle((int) point.x, (int) point.y);
+//        }
+//        double angle = (360.0 / mLines) * Math.PI / 180;
+//        for (int i = 0; i < mLines; i++) {
+//            Coordinates prevPoint = new Coordinates(splinePoints.get(0));
+//            prevPoint.x = prevPoint.x / maxSplineSize;
+//            prevPoint.y = prevPoint.y / maxSplineSize;
+//            prevPoint.z = prevPoint.z / maxSplineSize;
+//            prevPoint.rotateX(i * angle).rotateY(yAngleRad).rotateZ(zAngleRad).rotateX(xAngleRad).
+//                    translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(prevPoint.w);
+//            for (int l = 1; l < splinePoints.size(); l++) {
+//                Coordinates point = new Coordinates(splinePoints.get(l));
+//                point.x = point.x / maxSplineSize;
+//                point.y = point.y / maxSplineSize;
+//                point.z = point.z / maxSplineSize;
+//
+//                point.rotateX(i * angle).rotateY(yAngleRad).rotateZ(zAngleRad).rotateX(xAngleRad).
+//                        translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(point.w);
+//                g.drawLine((int) (prevPoint.x * maxSplineSize) + xImCenter, (int) (prevPoint.y * maxSplineSize) + yImCenter,
+//                        (int) (point.x * maxSplineSize) + xImCenter, (int) (point.y * maxSplineSize) + yImCenter);
+//                prevPoint = point;
+//            }
+//        }
+    }
+
+    private void drawCub(int sideLength, Graphics g) {
+        shift = (int) ((double) sideLength / 2 / Math.sin(CAM_ANGLE * Math.PI / 180));
+
+        ArrayList<Coordinates> points = new ArrayList<>();
+        points.add(new Coordinates(-sideLength, -sideLength, -sideLength));
+        points.add(new Coordinates(-sideLength, sideLength, -sideLength));
+        points.add(new Coordinates(sideLength, sideLength, -sideLength));
+        points.add(new Coordinates(sideLength, -sideLength, -sideLength));
+
+        points.add(new Coordinates(-sideLength, -sideLength, sideLength));
+        points.add(new Coordinates(-sideLength, sideLength, sideLength));
+        points.add(new Coordinates(sideLength, sideLength, sideLength));
+        points.add(new Coordinates(sideLength, -sideLength, sideLength));
+
+        ArrayList<Map.Entry<Integer, Integer>> lines = new ArrayList<>();
+        lines.add(new AbstractMap.SimpleEntry<>(0,1));
+        lines.add(new AbstractMap.SimpleEntry<>(1,2));
+        lines.add(new AbstractMap.SimpleEntry<>(2,3));
+        lines.add(new AbstractMap.SimpleEntry<>(0,3));
+
+        lines.add(new AbstractMap.SimpleEntry<>(4,5));
+        lines.add(new AbstractMap.SimpleEntry<>(5,6));
+        lines.add(new AbstractMap.SimpleEntry<>(6,7));
+        lines.add(new AbstractMap.SimpleEntry<>(4,7));
+
+        lines.add(new AbstractMap.SimpleEntry<>(0,4));
+        lines.add(new AbstractMap.SimpleEntry<>(1,5));
+        lines.add(new AbstractMap.SimpleEntry<>(2,6));
+        lines.add(new AbstractMap.SimpleEntry<>(3,7));
+
+        for (Map.Entry<Integer, Integer> line : lines) {
+            draw3DLine(points.get(line.getKey()), points.get(line.getValue()), g);
+        }
+    }
+
+    private void draw3DLine(Coordinates p1, Coordinates p2, Graphics g) {
+        int maxSplineSize = 20;
+        Coordinates p1Norm = new Coordinates(p1);
+        p1Norm.x = p1Norm.x / maxSplineSize;
+        p1Norm.y = p1Norm.y / maxSplineSize;
+        p1Norm.z = p1Norm.z / maxSplineSize;
+
+        Coordinates p2Norm = new Coordinates(p2);
+        p2Norm.x = p2Norm.x / maxSplineSize;
+        p2Norm.y = p2Norm.y / maxSplineSize;
+        p2Norm.z = p2Norm.z / maxSplineSize;
 
         double xAngleRad = xAngle * Math.PI / 180;
         double yAngleRad = yAngle * Math.PI / 180;
         double zAngleRad = zAngle * Math.PI / 180;
 
-        int maxSplineSize = spline.calcMaxSplineSize();
+        p1Norm.rotateY(yAngleRad).rotateZ(zAngleRad).rotateX(xAngleRad).
+                translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(p1Norm.w);
+        p2Norm.rotateY(yAngleRad).rotateZ(zAngleRad).rotateX(xAngleRad).
+                translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(p2Norm.w);
 
-        ArrayList<Coordinates> splinePoints = (ArrayList<Coordinates>) spline.getSplinePoints();
-        ArrayList<Coordinates> edges = (ArrayList<Coordinates>) spline.getSplineEdgesCoordinates();
-
-        for (Coordinates point : edges) {
-            drawCircle((int) point.x, (int) point.y);
-        }
-        double angle = (360.0 / mLines) * Math.PI / 180;
-        for (int i = 0; i < mLines; i++) {
-            Coordinates prevPoint = new Coordinates(splinePoints.get(0));
-            prevPoint.x = prevPoint.x / maxSplineSize;
-            prevPoint.y = prevPoint.y / maxSplineSize;
-            prevPoint.z = prevPoint.z / maxSplineSize;
-            prevPoint.rotateX(i * angle).rotateY(yAngleRad).rotateZ(zAngleRad).rotateX(xAngleRad).
-                    translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(prevPoint.w);
-            for (int l = 1; l < splinePoints.size(); l++) {
-                Coordinates point = new Coordinates(splinePoints.get(l));
-                point.x = point.x / maxSplineSize;
-                point.y = point.y / maxSplineSize;
-                point.z = point.z / maxSplineSize;
-
-                point.rotateX(i * angle).rotateY(yAngleRad).rotateZ(zAngleRad).rotateX(xAngleRad).
-                        translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(point.w);
-                g.drawLine((int) (prevPoint.x * maxSplineSize) + xImCenter, (int) (prevPoint.y * maxSplineSize) + yImCenter,
-                        (int) (point.x * maxSplineSize) + xImCenter, (int) (point.y * maxSplineSize) + yImCenter);
-                prevPoint = point;
-            }
-        }
+        g.drawLine((int) (p1Norm.x * maxSplineSize) + xImCenter, (int) (p1Norm.y * maxSplineSize) + yImCenter,
+                (int) (p2Norm.x * maxSplineSize) + xImCenter, (int) (p2Norm.y * maxSplineSize) + yImCenter);
     }
 
     private void drawCircle(int xCoord, int rad) {
