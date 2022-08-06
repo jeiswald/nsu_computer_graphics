@@ -2,7 +2,6 @@ package ru.nsu.fit.ejsvald.filters;
 
 import ru.nsu.fit.ejsvald.setting.EdgeDetectionSetPanel;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class EdgeDetectionFilter extends Filter {
@@ -58,13 +57,14 @@ public class EdgeDetectionFilter extends Filter {
                     if (valB < binaryPar) valB = 0;
                     else valB = 255;
                 } else {
-                    if (valR < 0) valR = 0;
+                    if (valR < 50) valR = 0;
                     else if (valR > 255) valR = 255;
-                    if (valG < 0) valG = 0;
+                    if (valG < 50) valG = 0;
                     else if (valG > 255) valG = 255;
-                    if (valB < 0) valB = 0;
+                    if (valB < 50) valB = 0;
                     else if (valB > 255) valB = 255;
                 }
+
                 int resultColor = (valR << 16) | (valG << 8) | (valB);
                 toReturn.setRGB(i, j, resultColor);
             }
@@ -182,6 +182,7 @@ public class EdgeDetectionFilter extends Filter {
 
     public void setSobel(boolean sobel) {
         this.sobel = sobel;
+        this.roberts = !sobel;
     }
 
     public boolean isRoberts() {
@@ -190,5 +191,6 @@ public class EdgeDetectionFilter extends Filter {
 
     public void setRoberts(boolean roberts) {
         this.roberts = roberts;
+        this.sobel = !roberts;
     }
 }

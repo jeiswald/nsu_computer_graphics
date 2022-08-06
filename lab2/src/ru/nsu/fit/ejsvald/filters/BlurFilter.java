@@ -126,6 +126,17 @@ public class BlurFilter extends KernelFilter {
         }
     }
 
+    public void setGauss(boolean gauss, double sigma) {
+        this.gauss = gauss;
+        setSigma(sigma);
+        if (gauss) {
+            setMatrix(fillGaussMatrix(), (int) Math.ceil(sigma * 3) * 2 + 1);
+            setOffset(0);
+        } else {
+            setBlurMatrix(matrixSize);
+        }
+    }
+
     public void setSigma(double sigma) {
         this.sigma = sigma;
     }
