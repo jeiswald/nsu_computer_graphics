@@ -57,11 +57,11 @@ public class EdgeDetectionFilter extends Filter {
                     if (valB < binaryPar) valB = 0;
                     else valB = 255;
                 } else {
-                    if (valR < 50) valR = 0;
+                    if (valR < 20) valR = 0;
                     else if (valR > 255) valR = 255;
-                    if (valG < 50) valG = 0;
+                    if (valG < 20) valG = 0;
                     else if (valG > 255) valG = 255;
-                    if (valB < 50) valB = 0;
+                    if (valB < 20) valB = 0;
                     else if (valB > 255) valB = 255;
                 }
 

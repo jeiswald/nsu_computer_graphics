@@ -1,6 +1,7 @@
 package FIT_19207_Eysvald_Init;
 
 import ru.nsu.fit.ejsvald.filters.*;
+import ru.nsu.fit.ejsvald.filters.pencil.PencilTool;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -166,6 +167,14 @@ public class MainPanel extends JPanel implements MouseListener {
         setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
         fitImage();
         repaint();
+    }
+
+    public PencilTool getPencilTool() {
+        return (PencilTool) filters.get(PencilTool.NAME);
+    }
+
+    public void setPencilTool(PencilTool pencilTool) {
+        filters.put(PencilTool.NAME, pencilTool);
     }
 
     public EdgeDetectionFilter getEdgeDetectionFilter() {

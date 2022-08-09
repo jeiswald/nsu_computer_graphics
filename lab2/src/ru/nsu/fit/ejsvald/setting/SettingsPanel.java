@@ -28,6 +28,13 @@ public abstract class SettingsPanel extends JPanel {
         add(checkBox, c);
     }
 
+    protected void addLabel(int x, int y, JLabel label) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = x;
+        c.gridy = y;
+        add(label, c);
+    }
+
     protected JTextField addAndCreateTextFieldAndSlider(String name, int x, int y, double defaultValue,
                                                         double bound1, double bound2, int sliderDivider) {
         JTextField textField = new JTextField();

@@ -1,6 +1,7 @@
 package FIT_19207_Eysvald_Init;
 
 import ru.nsu.fit.ejsvald.filters.*;
+import ru.nsu.fit.ejsvald.filters.pencil.PencilTool;
 import ru.nsu.fit.ejsvald.setting.FitInSetPanel;
 import ru.nsu.fit.ejsvald.setting.SettingDialog;
 import ru.nsu.fit.ejsvald.setting.SettingsPanel;
@@ -232,7 +233,8 @@ public class InitMainWindow extends MainFrame implements ComponentListener {
     }
 
     public void onRotate() {
-        if (mainPanel.getOriginalImage() == null) return;
+        if (mainPanel.getOriginalImage() == null ||
+                mainPanel.getFilteredImage() == null) return;
         RotationTool rotationTool = mainPanel.getRotationTool();
         if (rotationTool == null) {
             mainPanel.setRotationTool(new RotationTool());
@@ -245,50 +247,55 @@ public class InitMainWindow extends MainFrame implements ComponentListener {
         settingDialog.setVisible(true);
         if (settingDialog.isOk()) {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            mainPanel.setFilteredImage(rotationTool.apply(mainPanel.getOriginalImage()));
+            mainPanel.setFilteredImage(rotationTool.apply(mainPanel.getFilteredImage()));
             this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             mainPanel.repaint();
         }
     }
 
     public void onBlackWhite() {
-        if (mainPanel.getOriginalImage() == null) return;
+        if (mainPanel.getOriginalImage() == null ||
+        mainPanel.getFilteredImage() == null) return;
         BlackWhiteFilter blackWhiteFilter = new BlackWhiteFilter();
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        mainPanel.setFilteredImage(blackWhiteFilter.apply(mainPanel.getOriginalImage()));
+        mainPanel.setFilteredImage(blackWhiteFilter.apply(mainPanel.getFilteredImage()));
         this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         mainPanel.repaint();
     }
 
     public void onNegative() {
-        if (mainPanel.getOriginalImage() == null) return;
+        if (mainPanel.getOriginalImage() == null ||
+                mainPanel.getFilteredImage() == null) return;
         NegativeFilter negativeFilter = new NegativeFilter();
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        mainPanel.setFilteredImage(negativeFilter.apply(mainPanel.getOriginalImage()));
+        mainPanel.setFilteredImage(negativeFilter.apply(mainPanel.getFilteredImage()));
         this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         mainPanel.repaint();
     }
 
     public void onSharpness() {
-        if (mainPanel.getOriginalImage() == null) return;
+        if (mainPanel.getOriginalImage() == null ||
+                mainPanel.getFilteredImage() == null) return;
         SharpnessFilter sharpnessFilter = new SharpnessFilter();
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        mainPanel.setFilteredImage(sharpnessFilter.apply(mainPanel.getOriginalImage()));
+        mainPanel.setFilteredImage(sharpnessFilter.apply(mainPanel.getFilteredImage()));
         this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         mainPanel.repaint();
     }
 
     public void onEmbossing() {
-        if (mainPanel.getOriginalImage() == null) return;
+        if (mainPanel.getOriginalImage() == null ||
+                mainPanel.getFilteredImage() == null) return;
         EmbossingFilter embossingFilter = new EmbossingFilter();
         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        mainPanel.setFilteredImage(embossingFilter.apply(mainPanel.getOriginalImage()));
+        mainPanel.setFilteredImage(embossingFilter.apply(mainPanel.getFilteredImage()));
         this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         mainPanel.repaint();
     }
 
     public void onBlur() {
-        if (mainPanel.getOriginalImage() == null) return;
+        if (mainPanel.getOriginalImage() == null ||
+                mainPanel.getFilteredImage() == null) return;
         BlurFilter blurFilter = mainPanel.getBlurFilter();
         if (blurFilter == null) {
             mainPanel.setBlurFilter(new BlurFilter());
@@ -301,14 +308,15 @@ public class InitMainWindow extends MainFrame implements ComponentListener {
         settingDialog.setVisible(true);
         if (settingDialog.isOk()) {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            mainPanel.setFilteredImage(blurFilter.apply(mainPanel.getOriginalImage()));
+            mainPanel.setFilteredImage(blurFilter.apply(mainPanel.getFilteredImage()));
             this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             mainPanel.repaint();
         }
     }
 
     public void onEdgeDetection() {
-        if (mainPanel.getOriginalImage() == null) return;
+        if (mainPanel.getOriginalImage() == null ||
+                mainPanel.getFilteredImage() == null) return;
         EdgeDetectionFilter edgeDetectionFilter = mainPanel.getEdgeDetectionFilter();
         if (edgeDetectionFilter == null) {
             mainPanel.setEdgeDetectionFilter(new EdgeDetectionFilter());
@@ -322,22 +330,36 @@ public class InitMainWindow extends MainFrame implements ComponentListener {
         settingsDialog.setVisible(true);
         if (settingsDialog.isOk()) {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            mainPanel.setFilteredImage(edgeDetectionFilter.apply(mainPanel.getOriginalImage()));
+            mainPanel.setFilteredImage(edgeDetectionFilter.apply(mainPanel.getFilteredImage()));
             this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             mainPanel.repaint();
         }
     }
 
     public void onPencil() {
-        PencilTool pencilTool = new PencilTool();
-        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        mainPanel.setFilteredImage(pencilTool.apply(mainPanel.getOriginalImage()));
-        this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-        mainPanel.repaint();
+        if (mainPanel.getOriginalImage() == null ||
+                mainPanel.getFilteredImage() == null) return;
+        PencilTool pencilTool = mainPanel.getPencilTool();
+        if (pencilTool == null) {
+            mainPanel.setPencilTool(new PencilTool());
+            pencilTool = mainPanel.getPencilTool();
+        }
+        SettingsPanel settingsPanel = pencilTool.getSettingsPanel();
+        SettingDialog settingsDialog = new SettingDialog(this, settingsPanel, "Pencil", true);
+        settingsDialog.setLocationRelativeTo(this);
+        settingsDialog.pack();
+        settingsDialog.setVisible(true);
+        if (settingsDialog.isOk()) {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            mainPanel.setFilteredImage(pencilTool.apply(mainPanel.getFilteredImage()));
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            mainPanel.repaint();
+        }
     }
 
     public void onDither() {
-        if (mainPanel.getOriginalImage() == null) return;
+        if (mainPanel.getOriginalImage() == null ||
+                mainPanel.getFilteredImage() == null) return;
         Dither dither = mainPanel.getDither();
         if (dither == null) {
             mainPanel.setDither(new Dither());
@@ -351,14 +373,15 @@ public class InitMainWindow extends MainFrame implements ComponentListener {
         settingsDialog.setVisible(true);
         if (settingsDialog.isOk()) {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            mainPanel.setFilteredImage(dither.apply(mainPanel.getOriginalImage()));
+            mainPanel.setFilteredImage(dither.apply(mainPanel.getFilteredImage()));
             this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             mainPanel.repaint();
         }
     }
 
     public void onGamma() {
-        if (mainPanel.getOriginalImage() == null) return;
+        if (mainPanel.getOriginalImage() == null ||
+                mainPanel.getFilteredImage() == null) return;
         GammaCorrection gammaCorrection = mainPanel.getGammaCorrection();
         if (gammaCorrection == null) {
             mainPanel.setGammaCorrection(new GammaCorrection());
@@ -372,14 +395,15 @@ public class InitMainWindow extends MainFrame implements ComponentListener {
         settingsDialog.setVisible(true);
         if (settingsDialog.isOk()) {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            mainPanel.setFilteredImage(gammaCorrection.apply(mainPanel.getOriginalImage()));
+            mainPanel.setFilteredImage(gammaCorrection.apply(mainPanel.getFilteredImage()));
             this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             mainPanel.repaint();
         }
     }
 
     public void onAquarelle() {
-        if (mainPanel.getOriginalImage() == null) return;
+        if (mainPanel.getOriginalImage() == null ||
+                mainPanel.getFilteredImage() == null) return;
         AquarelleFilter aquarelleFilter = mainPanel.getAquarelleFilter();
         if (aquarelleFilter == null) {
             mainPanel.setAquarelleFilter(new AquarelleFilter());
@@ -393,7 +417,7 @@ public class InitMainWindow extends MainFrame implements ComponentListener {
         settingsDialog.setVisible(true);
         if (settingsDialog.isOk()) {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            mainPanel.setFilteredImage(aquarelleFilter.apply(mainPanel.getOriginalImage()));
+            mainPanel.setFilteredImage(aquarelleFilter.apply(mainPanel.getFilteredImage()));
             this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             mainPanel.repaint();
         }

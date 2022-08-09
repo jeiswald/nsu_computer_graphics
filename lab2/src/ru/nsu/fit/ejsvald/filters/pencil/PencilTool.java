@@ -1,97 +1,78 @@
-package ru.nsu.fit.ejsvald.filters;
+package ru.nsu.fit.ejsvald.filters.pencil;
+
+import ru.nsu.fit.ejsvald.filters.*;
+import ru.nsu.fit.ejsvald.setting.PencilSetPanel;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-
-import static java.lang.Math.abs;
 
 public class PencilTool extends Filter {
     private List<double[][]> strokes;
-    private int strokeLength = 10;
+    private final int IMAGE_SPLIT_STEP = 256;
+    public static String NAME = "Pencil";
+
+    private int strokeLength = 12;
+    private boolean isDefaultEdgeDet = true;
+    private boolean isRobertsEdgeDet = false;
+    private int gradGap = 1;
+    private int binParam = 40;
+    private int maxGrayLevel = 70;
+    private int strokeStep = 1;
+
+    public PencilTool() {
+        settingsPanel = new PencilSetPanel(this);
+    }
 
     public BufferedImage apply(BufferedImage image) {
-        strokeLength = Math.min(image.getHeight(), image.getWidth()) / 30;
-        strokes = new ArrayList<>();
-        generateStrokes();
         BufferedImage imageToReturn;
-
         BlackWhiteFilter blackWhiteFilter = new BlackWhiteFilter();
-//        MedianFilter medianFilter = new MedianFilter();
         BlurFilter blurFilter = new BlurFilter();
         blurFilter.setGauss(true, 1.4);
         EdgeDetectionFilter edgeDetectionFilter = new EdgeDetectionFilter();
-//        edgeDetectionFilter.setBlackWhite(true);
-//        edgeDetectionFilter.setSobel(true);
-//        imageToReturn = medianFilter.apply(image);
+
+        strokeLength = Math.min(image.getHeight(), image.getWidth()) / 50;
+        generateStrokes();
+
         imageToReturn = blurFilter.apply(image);
-
-//        imageToReturn = edgeDetection(imageToReturn);
-        imageToReturn = edgeDetectionFilter.apply(imageToReturn);
-
         imageToReturn = blackWhiteFilter.apply(imageToReturn);
 
-        //imageToReturn = expandAndBinImage(imageToReturn);
+        if (isDefaultEdgeDet) {
+            imageToReturn = edgeDetection(imageToReturn, gradGap);
+        } else if (isRobertsEdgeDet) {
+            imageToReturn = edgeDetectionFilter.apply(imageToReturn);
+        } else {
+            throw new RuntimeException();
+        }
 
+        imageToReturn = binImage(imageToReturn, binParam, maxGrayLevel);
 
-        imageToReturn = applyStrokes(imageToReturn);
+        imageToReturn = applyStrokes(imageToReturn, strokeStep);
         NegativeFilter negativeFilter = new NegativeFilter();
         imageToReturn = negativeFilter.apply(imageToReturn);
         return imageToReturn;
     }
 
-    private BufferedImage applyStrokes(BufferedImage image) {
-        BufferedImage extendedImage = getExtendedImage(image, strokeLength / 2);
-        ArrayList<BufferedImage> C = new ArrayList<>();
-        for (int i = 0; i < strokes.size(); i++) {
-            C.add(i, new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB));
-        }
-
-        for (int i = strokeLength / 2; i < extendedImage.getWidth() - strokeLength / 2; i++) {
-            for (int j = strokeLength / 2; j < extendedImage.getHeight() - strokeLength / 2; j++) {
-                int maxSum = 0;
-                int maxN = -1;
-
-                //calculate which stroke has the greatest response
-                for (int strokeN = 0; strokeN < strokes.size(); strokeN++) {
-                    double[][] stroke = strokes.get(strokeN);
-                    int sum = 0;
-                    for (int xInFil = 0; xInFil < strokeLength; xInFil++) {
-                        for (int yInFil = 0; yInFil < strokeLength; yInFil++) {
-                            int p = extendedImage.getRGB(i + (xInFil - strokeLength / 2),
-                                    j + (yInFil - strokeLength / 2)) & 0x000000ff;
-                            sum += p * stroke[xInFil][yInFil];
-                        }
-                    }
-                    if (sum >= maxSum) {
-                        maxSum = sum;
-                        maxN = strokeN;
-                    }
-                }
-                if (maxN != -1) {
-//                    if (maxSum > strokeLength / 3) {
-                    C.get(maxN).setRGB(i - strokeLength / 2,
-                            j - strokeLength / 2, extendedImage.getRGB(i, j));
-//                    }
-                }
-            }
-        }
-
-        BufferedImage imageToReturn = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+    private BufferedImage applyStrokes(BufferedImage image, int strokesStep) {
+        if (strokes == null) return null;
+        ArrayList<BufferedImage> C = (ArrayList<BufferedImage>) generateStrokeMaps(image, strokesStep);
+        if (C == null) return null;
+        BufferedImage imageToReturn = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
         for (int strokeN = 0; strokeN < strokes.size(); strokeN++) {
-//        for (int strokeN = 1; strokeN < 2; strokeN++) {
-            KernelFilter kernelFilter = new KernelFilter(strokes.get(strokeN), 1, 0, strokeLength);
+//        for (int strokeN = 2; strokeN < 3; strokeN++) {
+            KernelFilter kernelFilter = new KernelFilter(strokes.get(strokeN), strokeLength);
             BufferedImage tmpImage = kernelFilter.apply(C.get(strokeN));
             for (int x = 0; x < imageToReturn.getWidth(); x++) {
                 for (int y = 0; y < imageToReturn.getHeight(); y++) {
                     int addColor = tmpImage.getRGB(x, y);
-                    int color = imageToReturn.getRGB(x, y);
-                    int comp = ((addColor >> 16) & 0x000000ff) + ((color >> 16) & 0x000000ff);
+                    int existingColor = imageToReturn.getRGB(x, y);
+                    int comp = ((addColor >> 16) & 0x000000ff) + ((existingColor >> 16) & 0x000000ff);
                     if (comp != 255) {
                         comp *= 0.8;
                     }
-                    if (comp > 255) comp = 255;
+                    if (comp > 180) comp = 180;//todo const
                     int resultColor = (comp << 16) | (comp << 8) | (comp);
                     imageToReturn.setRGB(x, y, resultColor);
                 }
@@ -100,21 +81,61 @@ public class PencilTool extends Filter {
         return imageToReturn;
     }
 
-    private BufferedImage edgeDetection(BufferedImage image) {
+    private List<BufferedImage> generateStrokeMaps(BufferedImage image, int strokesStep) {
+        if (strokes == null || strokes.isEmpty()) return null;
+
+        BufferedImage extendedImage = getExtendedImage(image, strokeLength / 2);
+        ArrayList<BufferedImage> C = new ArrayList<>();
+        int responseParam = strokeLength * 30;
+        for (int i = 0; i < strokes.size(); i++) {
+            C.add(i, new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB));
+        }
+
+        List<Integer> xCoords = new ArrayList<>();
+        List<Integer> yCoords = new ArrayList<>();
+        xCoords.add(strokeLength / 2);
+        yCoords.add(strokeLength / 2);
+        for (int i = strokeLength / 2; i < extendedImage.getWidth() - strokeLength / 2; i += IMAGE_SPLIT_STEP) {
+            xCoords.add(Math.min(i + IMAGE_SPLIT_STEP, extendedImage.getWidth() - strokeLength / 2));
+        }
+        for (int i = strokeLength / 2; i < extendedImage.getHeight() - strokeLength / 2; i += IMAGE_SPLIT_STEP) {
+            yCoords.add(Math.min(i + IMAGE_SPLIT_STEP, extendedImage.getHeight() - strokeLength / 2));
+        }
+
+        List<StrokeMapGenerateThread> threads = new LinkedList<>();
+        for (int i = 0; i < xCoords.size() - 1; i++) {
+            for (int j = 0; j < yCoords.size() - 1; j++) {
+                StrokeMapGenerateThread thread = new StrokeMapGenerateThread(extendedImage, xCoords.get(i), yCoords.get(j),
+                        xCoords.get(i + 1), yCoords.get(j + 1), C, strokes, responseParam, strokeLength, strokesStep);
+                threads.add(thread);
+                thread.start();
+            }
+        }
+        System.out.println(threads.size());
+        try {
+            for (StrokeMapGenerateThread thread : threads) {
+                thread.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return C;
+    }
+
+    private BufferedImage edgeDetection(BufferedImage image, int gradGap) {//todo принимает чб, че-то где-то надо с этим сделать
         BufferedImage imageToReturn = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         int width = image.getWidth();
         int height = image.getHeight();
-
-        int gradGap = 1;
 
         for (int i = 0; i < width - gradGap; i++) {
             for (int j = 0; j < height - gradGap; j++) {
                 int p1 = image.getRGB(i, j);
                 int p2 = image.getRGB(i + gradGap, j);
                 int p3 = image.getRGB(i, j + gradGap);
-                int valR = (int) Math.sqrt(Math.pow((p2 >> 16) & 0x000000ff - (p1 >> 16) & 0x000000ff, 2)
-                        + Math.pow((p3 >> 16) & 0x000000ff - (p1 >> 16) & 0x000000ff, 2));
-                if (valR < 50) valR = 0;
+                int valR = (int) Math.sqrt(Math.pow(p2 & 0x000000ff - p1 & 0x000000ff, 2)
+                        + Math.pow(p3 & 0x000000ff - p1 & 0x000000ff, 2));
+                if (valR < 0) valR = 0;
                 else if (valR > 255) valR = 255;
                 int resultColor = (valR << 16) | (valR << 8) | (valR);
                 imageToReturn.setRGB(i, j, resultColor);
@@ -130,14 +151,15 @@ public class PencilTool extends Filter {
     }
 
     private void generateStrokes() {
+        strokes = new ArrayList<>();
         double angle = 22.5;
         int x1 = strokeLength / 2, x2 = strokeLength / 2, y1 = 0, y2 = strokeLength - 1;
         for (int i = 0; i < 3; i++) {
-            int xStep, yStep;
-            int dx = abs(x2 - x1);
-            int dy = abs(y2 - y1);
-            xStep = x2 >= x1 ? 1 : -1;
-            yStep = y2 >= y1 ? 1 : -1;
+//            int xStep, yStep;
+//            int dx = abs(x2 - x1);
+//            int dy = abs(y2 - y1);
+//            xStep = x2 >= x1 ? 1 : -1;
+//            yStep = y2 >= y1 ? 1 : -1;
 
             double[][] newStroke = new double[strokeLength][strokeLength];
 //            drawLineBresAbove45(newStroke, x1, y1, dx, dy, xStep, yStep, 1);
@@ -190,18 +212,41 @@ public class PencilTool extends Filter {
         }
     }
 
-    private BufferedImage expandAndBinImage(BufferedImage image) {
+    private BufferedImage expandAndBinImage(BufferedImage image, int binParam) {
+        BufferedImage imageToReturn = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+//        imageToReturn.getGraphics().drawImage(image, 0, 0, null);
+        int width = image.getWidth();
+        int height = image.getHeight();
+        for (int i = 0; i < width - 1; i++) {
+            for (int j = 1; j < height; j++) {
+                int p1 = image.getRGB(i, j);
+                int p1b = p1 & 0x0000ff;
+                if (p1b > binParam) {
+                    p1 = (new Color(128, 128, 128)).getRGB();
+                    imageToReturn.setRGB(i, j, p1);
+//                    if ((image.getRGB(i + 1, j) & 0x0000ff) == 0) {
+                    imageToReturn.setRGB(i + 1, j, p1);
+//                    }
+//                    if ((image.getRGB(i, j - 1)& 0x0000ff) == 0) {
+                    imageToReturn.setRGB(i, j - 1, p1);
+//                    }
+                }
+            }
+        }
+        return imageToReturn;
+    }
+
+    private BufferedImage binImage(BufferedImage image, int binParam, int grayLevel) {
         BufferedImage imageToReturn = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         int width = image.getWidth();
         int height = image.getHeight();
         for (int i = 0; i < width - 1; i++) {
             for (int j = 1; j < height; j++) {
                 int p1 = image.getRGB(i, j);
-                int p1r = (p1 >> 16) & 0x000000ff;
-                if (p1r > 0) {
-                    imageToReturn.setRGB(i, j, Color.WHITE.getRGB());
-                    imageToReturn.setRGB(i + 1, j, Color.WHITE.getRGB());
-                    imageToReturn.setRGB(i, j - 1, Color.WHITE.getRGB());
+                int p1b = p1 & 0x0000ff;
+                if (p1b > binParam) {
+                    p1 = (grayLevel << 16) | (grayLevel << 8) | (grayLevel);
+                    imageToReturn.setRGB(i, j, p1);
                 }
             }
         }
@@ -239,24 +284,17 @@ public class PencilTool extends Filter {
             }
             //Относительное изменение координаты Y
 //            float grad = (float) dy / dx;
-            float grad = (float) (y1 - y0) / (x1- x0);
+            float grad = (float) (y1 - y0) / (x1 - x0);
             //Промежуточная переменная для Y
             float intery = y0 + grad;
-            //Первая точка
-//            PutPixel(g, clr, x0, y0, 255);
             matrix[x0][y0] = 1;
 
             for (int x = x0 + 1; x < x1; x++) {
-                //Верхняя точка
-//                PutPixel(g, clr, x, IPart(intery), (int) (255 - FPart(intery) * 255));
                 matrix[x][(int) intery] = (255 - (intery - (int) intery) * 255) / 255;
-                //Нижняя точка
-//                PutPixel(g, clr, x, IPart(intery) + 1, (int) (FPart(intery) * 255));
                 matrix[x][(int) intery + 1] = ((intery - (int) intery) * 255) / 255;
                 //Изменение координаты Y
                 intery += grad;
             }
-            //Последняя точка
             matrix[x1][y1] = 1;
         }
         //Для Y-линии (коэффициент наклона > 1)
@@ -270,26 +308,17 @@ public class PencilTool extends Filter {
                 y0 = y1 - y0;
                 y1 -= y0;
             }
-            //Относительное изменение координаты X
-//            float grad = (float) dx / dy;
-            float grad = (float) (x1- x0) / (y1- y0);
+            float grad = (float) (x1 - x0) / (y1 - y0);
             //Промежуточная переменная для X
             float interx = x0 + grad;
-            //Первая точка
-//            PutPixel(g, clr, x0, y0, 255);
             matrix[x0][y0] = 1;
 
             for (int y = y0 + 1; y < y1; y++) {
-                //Верхняя точка
-//                PutPixel(g, clr, IPart(interx), y, 255 - (int) (FPart(interx) * 255));
                 matrix[(int) interx][y] = (255 - (interx - (int) interx) * 255) / 255;
-                //Нижняя точка
-//                PutPixel(g, clr, IPart(interx) + 1, y, (int) (FPart(interx) * 255));
                 matrix[(int) interx + 1][y] = interx - (int) interx;
                 //Изменение координаты X
                 interx += grad;
             }
-            //Последняя точка
             matrix[x1][y1] = 1;
         }
     }
@@ -322,4 +351,51 @@ public class PencilTool extends Filter {
         }
     }
 
+    public boolean isDefaultEdgeDet() {
+        return isDefaultEdgeDet;
+    }
+
+    public boolean isRobertsEdgeDet() {
+        return isRobertsEdgeDet;
+    }
+
+    public void setDefaultEdgeDet(boolean defaultEdgeDet) {
+        isDefaultEdgeDet = defaultEdgeDet;
+    }
+
+    public void setRobertsEdgeDet(boolean robertsEdgeDet) {
+        isRobertsEdgeDet = robertsEdgeDet;
+    }
+
+    public void setGradGap(int gradGap) {
+        this.gradGap = gradGap;
+    }
+
+    public void setBinParam(int binParam) {
+        this.binParam = binParam;
+    }
+
+    public void setMaxGrayLevel(int maxGrayLevel) {
+        this.maxGrayLevel = maxGrayLevel;
+    }
+
+    public void setStrokeStep(int strokeStep) {
+        this.strokeStep = strokeStep;
+    }
+
+    public int getGradGap() {
+        return gradGap;
+    }
+
+    public int getBinParam() {
+        return binParam;
+    }
+
+    public int getMaxGrayLevel() {
+        return maxGrayLevel;
+    }
+
+    public int getStrokeStep() {
+        return strokeStep;
+    }
 }
