@@ -10,6 +10,8 @@ public class PencilSetPanel extends SettingsPanel {
     private JCheckBox robertsCheckBox;
     private JCheckBox defaultEdgeDCheckBox;
 
+    private JCheckBox reverseBlackWhiteBox;
+
     private JTextField gradientStepTF = new JTextField();
 
     private JSlider gradientStepSlider = new JSlider();
@@ -68,6 +70,7 @@ public class PencilSetPanel extends SettingsPanel {
             parentComponent.pack();
             repaint();
         });
+        reverseBlackWhiteBox = new JCheckBox("reverse Black&White applying", pencilTool.isReverseBW());
         createTextFieldAndSlider(gradientStepTF, gradientStepSlider, pencilTool.getGradGap(), 1, 5, 1);
         createTextFieldAndSlider(strokesStepTF, strokesStepSlider,  pencilTool.getStrokeStep(), 1, 10, 1);
         createTextFieldAndSlider(maxGrayLevelTF, maxGrayLevelSlider,
@@ -90,6 +93,7 @@ public class PencilSetPanel extends SettingsPanel {
         addLabel(0, count++, new JLabel("Edge detection: "));
         addCheckBox(0, count, defaultEdgeDCheckBox);
         addCheckBox(1, count++, robertsCheckBox);
+        addCheckBox(0, count++, reverseBlackWhiteBox);
         if (defaultEdgeDCheckBox.isSelected()) {
             addTextFieldAndSlider("Gradient step", 0, count++, gradientStepTF, gradientStepSlider);
         }
@@ -102,6 +106,7 @@ public class PencilSetPanel extends SettingsPanel {
     void applySettings() throws IOException {
         pencilTool.setDefaultEdgeDet(defaultEdgeDCheckBox.isSelected());
         pencilTool.setRobertsEdgeDet(robertsCheckBox.isSelected());
+        pencilTool.setReverseBW(reverseBlackWhiteBox.isSelected());
         if (defaultEdgeDCheckBox.isSelected()) {
             pencilTool.setGradGap(Integer.parseInt(gradientStepTF.getText()));
         }

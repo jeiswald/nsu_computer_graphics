@@ -57,12 +57,12 @@ public class EdgeDetectionFilter extends Filter {
                     if (valB < binaryPar) valB = 0;
                     else valB = 255;
                 } else {
-                    if (valR < 20) valR = 0;
-                    else if (valR > 255) valR = 255;
-                    if (valG < 20) valG = 0;
-                    else if (valG > 255) valG = 255;
-                    if (valB < 20) valB = 0;
-                    else if (valB > 255) valB = 255;
+                    if (valR < 0) valR = 0;
+                    else if (valR > 240) valR = 240;
+                    if (valG < 0) valG = 0;
+                    else if (valG > 240) valG = 240;
+                    if (valB < 0) valB = 0;
+                    else if (valB > 240) valB = 240;
                 }
 
                 int resultColor = (valR << 16) | (valG << 8) | (valB);
