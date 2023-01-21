@@ -37,13 +37,13 @@ public class PencilTool extends Filter {
         BlurFilter blurFilter = new BlurFilter();
         blurFilter.setGauss(true, 1.4);
         EdgeDetectionFilter edgeDetectionFilter = new EdgeDetectionFilter();
-        strokeLength = Math.min(image.getHeight(), image.getWidth()) / 50;
+        strokeLength = Math.min(image.getHeight(), image.getWidth()) / 30;
         strokesBres = generateStrokesBres();
         strokesWo = generateStrokesWo();
 
         if (!reverseBW) {
             imageToReturn = blackWhiteFilter.apply(image);
-            imageToReturn = blurFilter.apply(imageToReturn);
+//            imageToReturn = blurFilter.apply(imageToReturn);
             if (isDefaultEdgeDet) {
                 imageToReturn = edgeDetection(imageToReturn, gradGap);
             } else if (isRobertsEdgeDet) {
@@ -52,12 +52,12 @@ public class PencilTool extends Filter {
                 throw new RuntimeException();
             }
         } else {
-            imageToReturn = blurFilter.apply(image);
+//            imageToReturn = blurFilter.apply(image);
 
             if (isDefaultEdgeDet) {
-                imageToReturn = edgeDetection(imageToReturn, gradGap);
+                imageToReturn = edgeDetection(image, gradGap);
             } else if (isRobertsEdgeDet) {
-                imageToReturn = edgeDetectionFilter.apply(imageToReturn);
+                imageToReturn = edgeDetectionFilter.apply(image);
             } else {
                 throw new RuntimeException();
             }
