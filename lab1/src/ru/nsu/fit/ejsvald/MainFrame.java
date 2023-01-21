@@ -1,4 +1,4 @@
-package FIT_19207_Eysvald_Init;
+package ru.nsu.fit.ejsvald;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -300,7 +300,6 @@ public class MainFrame extends JFrame {
      *
      * @param menuPath - path to menu item to create toolbar button from
      * @return created toolbar button
-     * @see MainFrame.getMenuItem
      */
     public JButton createToolBarButton(String menuPath) {
         JMenuItem item = (JMenuItem) getMenuElement(menuPath);

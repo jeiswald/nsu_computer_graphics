@@ -1,6 +1,6 @@
 package ru.nsu.fit.ejsvald.setting;
 
-import FIT_19207_Eysvald_Init.MainPanel;
+import ru.nsu.fit.ejsvald.MainPanel;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;

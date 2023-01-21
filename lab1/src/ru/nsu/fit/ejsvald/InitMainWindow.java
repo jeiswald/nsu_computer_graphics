@@ -1,6 +1,5 @@
-package FIT_19207_Eysvald_Init;
+package ru.nsu.fit.ejsvald;
 
-import ru.nsu.fit.ejsvald.BasicColors;
 import ru.nsu.fit.ejsvald.setting.ColorChooserPanel;
 import ru.nsu.fit.ejsvald.setting.SettingDialog;
 import ru.nsu.fit.ejsvald.tool.FloodFillTool;

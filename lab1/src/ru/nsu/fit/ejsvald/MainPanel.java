@@ -1,4 +1,4 @@
-package FIT_19207_Eysvald_Init;
+package ru.nsu.fit.ejsvald;
 
 import ru.nsu.fit.ejsvald.tool.EventType;
 import ru.nsu.fit.ejsvald.tool.Tool;
