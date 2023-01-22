@@ -205,10 +205,12 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        double xShift = (e.getX() - xPressed) * 2.0 / 3;
-        double yShift = (e.getY() - yPressed) * 2.0 / 3;
-        yAngle = (int) ((yAngle - xShift) % 360);
-        xAngle = (int) ((xAngle + yShift) % 360);
+        double xShift = (e.getX() - xPressed) * 2.0 / 10;
+        double yShift = (e.getY() - yPressed) * 2.0 / 10;
+
+        yAngle = (int) (yAngle - xShift) % 360;
+        xAngle = (int) (xAngle + yShift) % 360;
+
         xPressed = e.getX();
         yPressed = e.getY();
         drawModel();
@@ -239,7 +241,7 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        Zf += e.getWheelRotation() * 2;
+        Zf -= e.getWheelRotation() * 4;
         drawModel();
         repaint();
     }

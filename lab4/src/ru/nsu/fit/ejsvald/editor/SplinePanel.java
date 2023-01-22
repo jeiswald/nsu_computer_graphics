@@ -28,7 +28,7 @@ public class SplinePanel extends JPanel implements MouseListener, MouseMotionLis
     private final EditorSettingsPanel settingsPanel;
 
     public SplinePanel(ModelFrame modelFrame) {
-        setPreferredSize(new Dimension(1000, 600));
+        setPreferredSize(new Dimension(1000, 500));
         this.modelFrame = modelFrame;
         addMouseListener(this);
         addMouseMotionListener(this);
