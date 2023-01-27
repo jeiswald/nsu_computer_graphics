@@ -1,0 +1,3 @@
+Author Eysvald Julia 19207
+This application consists of two parts - editor, that let you create a b-spline,
+and a modeling window, that shows you the figure of rotation formed by the spline.
