@@ -1,0 +1,5 @@
+This program implements such image filtering algorithms as
+Black and White, Blur, Aquarelle, Floyd-Steinberg and Ordered
+Dither, Edge detection, Emboss, Gamma correction, Negative, Sharpening
+and Pencil painting imitation filters.
+Author Eysvald Julia 19207
