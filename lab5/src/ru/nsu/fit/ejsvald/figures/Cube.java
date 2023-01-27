@@ -1,4 +1,7 @@
-package ru.nsu.fit.ejsvald;
+package ru.nsu.fit.ejsvald.figures;
+
+import ru.nsu.fit.ejsvald.Coordinates;
+import ru.nsu.fit.ejsvald.Polygon4;
 
 import java.util.LinkedList;
 import java.util.List;

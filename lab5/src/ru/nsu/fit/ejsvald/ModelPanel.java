@@ -1,5 +1,9 @@
 package ru.nsu.fit.ejsvald;
 
+import ru.nsu.fit.ejsvald.figures.Cube;
+import ru.nsu.fit.ejsvald.figures.Figure;
+import ru.nsu.fit.ejsvald.figures.Sphere;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -53,9 +57,8 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
     }
 
     public void addFigures() {
-        figures.add(new Sphere(new Coordinates(0, 0, 0), 40, 2));
-        //        drawCub(40, new Coordinates(-10, -10, -10), g);
-        //        drawCub(20, new Coordinates(-0, 0, 0), g);
+        figures.add(new Sphere(new Coordinates(0, 0, 0), 40, 10));
+//        figures.add(new Cube(new Coordinates(-60, 0,-60), 20));
     }
 
     private void setImage(BufferedImage image) {
