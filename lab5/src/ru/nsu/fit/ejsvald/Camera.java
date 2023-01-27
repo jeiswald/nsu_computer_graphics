@@ -92,8 +92,8 @@ public class Camera {
     public Coordinates calcRealSizeProjection(Coordinates point, int boxSize) {
         Coordinates projectedPoint = new Coordinates(point);
         return projectedPoint.scale(1.0 / boxSize, 1.0 / boxSize, 1.0 / boxSize)
-        .project(SW, SH, Zf, Zb).normalize(projectedPoint.w)
-        .scale(boxSize, boxSize, boxSize);
+                .project(SW, SH, Zf, Zb).normalize(projectedPoint.w)
+                .scale(boxSize, boxSize, boxSize);
     }
 
     public void scaleZf(double coeff) {
