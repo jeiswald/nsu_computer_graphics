@@ -11,9 +11,9 @@ import java.util.List;
 
 public class ModelPanel extends JPanel implements MouseListener, MouseMotionListener, ComponentListener,
         MouseWheelListener {
-    private static final int DEFAULT_X_ANGLE = 45;
-    private static final int DEFAULT_Y_ANGLE = 45;
-    private static final int DEFAULT_Z_ANGLE = 0;
+    private static final double DEFAULT_X_ANGLE = Math.PI / 4;
+    private static final double DEFAULT_Y_ANGLE = Math.PI / 4;
+    private static final double DEFAULT_Z_ANGLE = 0;
     private BufferedImage image;
 
     private Spline spline;
@@ -34,9 +34,9 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
     private int Zf;
     private int Zb = 100000;
 
-    private int xAngle = DEFAULT_X_ANGLE;
-    private int yAngle = DEFAULT_Y_ANGLE;
-    private int zAngle = DEFAULT_Z_ANGLE;
+    private double xAngle = DEFAULT_X_ANGLE;
+    private double yAngle = DEFAULT_Y_ANGLE;
+    private double zAngle = DEFAULT_Z_ANGLE;
 
     public ModelPanel() {
         setPreferredSize(new Dimension(1000, 600));
@@ -125,10 +125,6 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
 
         if (spline == null || spline.getSplinePoints().isEmpty()) return;
 
-        double xAngleRad = xAngle * Math.PI / 180;
-        double yAngleRad = yAngle * Math.PI / 180;
-        double zAngleRad = zAngle * Math.PI / 180;
-
         int maxSplineSize = spline.calcMaxSplineSize();
 
         ArrayList<Coordinates> splinePoints = (ArrayList<Coordinates>) spline.getSplinePoints();
@@ -137,13 +133,13 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
         for (Coordinates point : edges) {
             drawCircle((int) point.x, (int) point.y);
         }
-        double angle = (360.0 / mLines) * Math.PI / 180;
+        double angle = 2 * Math.PI / mLines;
         for (int i = 0; i < mLines; i++) {
             Coordinates prevPoint = new Coordinates(splinePoints.get(0));
             prevPoint.x = prevPoint.x / maxSplineSize;
             prevPoint.y = prevPoint.y / maxSplineSize;
             prevPoint.z = prevPoint.z / maxSplineSize;
-            prevPoint.rotateX(i * angle).rotateY(yAngleRad).rotateZ(zAngleRad).rotateX(xAngleRad).
+            prevPoint.rotateX(i * angle).rotateY(yAngle).rotateZ(zAngle).rotateX(xAngle).
                     translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(prevPoint.w);
             for (int l = 1; l < splinePoints.size(); l++) {
                 Coordinates point = new Coordinates(splinePoints.get(l));
@@ -151,7 +147,7 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
                 point.y = point.y / maxSplineSize;
                 point.z = point.z / maxSplineSize;
 
-                point.rotateX(i * angle).rotateY(yAngleRad).rotateZ(zAngleRad).rotateX(xAngleRad).
+                point.rotateX(i * angle).rotateY(yAngle).rotateZ(zAngle).rotateX(xAngle).
                         translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(point.w);
                 g.drawLine((int) (prevPoint.x * maxSplineSize) + xImCenter, (int) (prevPoint.y * maxSplineSize) + yImCenter,
                         (int) (point.x * maxSplineSize) + xImCenter, (int) (point.y * maxSplineSize) + yImCenter);
@@ -164,10 +160,7 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
         Graphics2D g = image.createGraphics();
         g.setColor(Color.WHITE);
 
-        double angle = 360.0 / mLines / circleApproxNum * Math.PI / 180;
-        double xAngleRad = xAngle * Math.PI / 180;
-        double yAngleRad = yAngle * Math.PI / 180;
-        double zAngleRad = zAngle * Math.PI / 180;
+        double angle = 2 * Math.PI / mLines / circleApproxNum;
 
         int maxSplineSize = spline.calcMaxSplineSize();
 
@@ -176,7 +169,7 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
         prevPoint.y = prevPoint.y / maxSplineSize;
         prevPoint.z = prevPoint.z / maxSplineSize;
 
-        prevPoint.rotateY(yAngleRad).rotateZ(zAngleRad).rotateX(xAngleRad).translate(0, 0, shift)
+        prevPoint.rotateY(yAngle).rotateZ(zAngle).rotateX(xAngle).translate(0, 0, shift)
                 .project(SW, SH, Zf, Zb).normalize(prevPoint.w);
 
         for (int i = 1; i < mLines * circleApproxNum + 1; i++) {
@@ -185,7 +178,7 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
             point.y = point.y / maxSplineSize;
             point.z = point.z / maxSplineSize;
 
-            point.rotateX(i * angle).rotateY(yAngleRad).rotateZ(zAngleRad).rotateX(xAngleRad).
+            point.rotateX(i * angle).rotateY(yAngle).rotateZ(zAngle).rotateX(xAngle).
                     translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(point.w);
 
             g.drawLine((int) (prevPoint.x * maxSplineSize) + xImCenter, (int) (prevPoint.y * maxSplineSize) + yImCenter,
@@ -205,11 +198,11 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        double xShift = (e.getX() - xPressed) * 2.0 / 10;
-        double yShift = (e.getY() - yPressed) * 2.0 / 10;
+        double xShift = e.getX() - xPressed;
+        double yShift = e.getY() - yPressed;
 
-        yAngle = (int) (yAngle - xShift) % 360;
-        xAngle = (int) (xAngle + yShift) % 360;
+        yAngle = yAngle - Math.toRadians(xShift) * 2 / 3;
+        xAngle = xAngle + Math.toRadians(yShift) * 2 / 3;
 
         xPressed = e.getX();
         yPressed = e.getY();
@@ -241,7 +234,7 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        Zf -= e.getWheelRotation() * 4;
+        Zf -= e.getWheelRotation() * 15;
         drawModel();
         repaint();
     }
@@ -282,15 +275,15 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
         return Zf;
     }
 
-    public int getxAngle() {
+    public double getxAngle() {
         return xAngle;
     }
 
-    public int getyAngle() {
+    public double getyAngle() {
         return yAngle;
     }
 
-    public int getzAngle() {
+    public double getzAngle() {
         return zAngle;
     }
 
