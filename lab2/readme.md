@@ -14,9 +14,29 @@
 - преобразование изображение к черно-белому
 - размытие 
 - акварелизация
-- упорядоченный дизеринг и дизеринг Флойда-Стейнберга
-- выделение границ
+
+![лена_акварель](https://github.com/jeiswald/nsu_computer_graphics/assets/93196338/3acd6d60-132b-45fb-beda-fe8b9cf13551)
+
+- упорядоченный дизеринг
+
+![лена_упорядоченный_дизеринг_3-3-3](https://github.com/jeiswald/nsu_computer_graphics/assets/93196338/d0cc341e-be79-4b25-9e5b-2016b56d3a30)
+
+- дизеринг Флойда-Стейнберга
+
+![лена_флойд-стейнберг_дизеринг_3-3-3](https://github.com/jeiswald/nsu_computer_graphics/assets/93196338/9ae68e08-9f67-493a-94ab-9d5b890f7bb3)
+
+- выделение границ оператором Робертса
+
+![лена_границы_робертс](https://github.com/jeiswald/nsu_computer_graphics/assets/93196338/5ef6433c-0478-417a-a9fd-bf2c46e3060e)
+
+- выделение границ оператором Собеля
+
+![лена_границы_собель](https://github.com/jeiswald/nsu_computer_graphics/assets/93196338/4ca6021c-2aff-4c0d-bec0-effd7135ff61)
+
 - тиснение
+
+![лена_тиснение](https://github.com/jeiswald/nsu_computer_graphics/assets/93196338/341b7653-818c-42b0-801b-ab08b2ac6b12)
+
 - гамма-коррекция
 - инверсия
 - усиление резкости
