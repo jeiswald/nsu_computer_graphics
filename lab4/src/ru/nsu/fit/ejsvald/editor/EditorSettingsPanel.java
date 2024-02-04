@@ -206,7 +206,7 @@ public class EditorSettingsPanel extends JPanel {
 
     public void setActivePoint(int number) {
         activePoint.setText(String.valueOf(number));
-        setActivePointCoordinates((int) splinePanel.getPoint(number).x, (int) splinePanel.getPoint(number).y);
+        setActivePointCoordinates((int) splinePanel.getPoint(number).getX(), (int) splinePanel.getPoint(number).getY());
     }
 
     public void setActivePointCoordinates(int xActivePoint, int yActivePoint) {

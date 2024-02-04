@@ -131,26 +131,22 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
         ArrayList<Coordinates> edges = (ArrayList<Coordinates>) spline.getSplineEdgesCoordinates();
 
         for (Coordinates point : edges) {
-            drawCircle((int) point.x, (int) point.y);
+            drawCircle((int) point.getX(), (int) point.getY());
         }
         double angle = 2 * Math.PI / mLines;
         for (int i = 0; i < mLines; i++) {
             Coordinates prevPoint = new Coordinates(splinePoints.get(0));
-            prevPoint.x = prevPoint.x / maxSplineSize;
-            prevPoint.y = prevPoint.y / maxSplineSize;
-            prevPoint.z = prevPoint.z / maxSplineSize;
+            prevPoint.scale(1.0 / maxSplineSize);
             prevPoint.rotateX(i * angle).rotateY(yAngle).rotateZ(zAngle).rotateX(xAngle).
-                    translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(prevPoint.w);
+                    translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(prevPoint.getW());
             for (int l = 1; l < splinePoints.size(); l++) {
                 Coordinates point = new Coordinates(splinePoints.get(l));
-                point.x = point.x / maxSplineSize;
-                point.y = point.y / maxSplineSize;
-                point.z = point.z / maxSplineSize;
+                point.scale(1.0 / maxSplineSize);
 
                 point.rotateX(i * angle).rotateY(yAngle).rotateZ(zAngle).rotateX(xAngle).
-                        translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(point.w);
-                g.drawLine((int) (prevPoint.x * maxSplineSize) + xImCenter, (int) (prevPoint.y * maxSplineSize) + yImCenter,
-                        (int) (point.x * maxSplineSize) + xImCenter, (int) (point.y * maxSplineSize) + yImCenter);
+                        translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(point.getW());
+                g.drawLine((int) (prevPoint.getX() * maxSplineSize) + xImCenter, (int) (prevPoint.getY() * maxSplineSize) + yImCenter,
+                        (int) (point.getX() * maxSplineSize) + xImCenter, (int) (point.getY() * maxSplineSize) + yImCenter);
                 prevPoint = point;
             }
         }
@@ -165,24 +161,20 @@ public class ModelPanel extends JPanel implements MouseListener, MouseMotionList
         int maxSplineSize = spline.calcMaxSplineSize();
 
         Coordinates prevPoint = new Coordinates(xCoord, rad, 0);
-        prevPoint.x = prevPoint.x / maxSplineSize;
-        prevPoint.y = prevPoint.y / maxSplineSize;
-        prevPoint.z = prevPoint.z / maxSplineSize;
+        prevPoint.scale(1.0 / maxSplineSize);
 
         prevPoint.rotateY(yAngle).rotateZ(zAngle).rotateX(xAngle).translate(0, 0, shift)
-                .project(SW, SH, Zf, Zb).normalize(prevPoint.w);
+                .project(SW, SH, Zf, Zb).normalize(prevPoint.getW());
 
         for (int i = 1; i < mLines * circleApproxNum + 1; i++) {
             Coordinates point = new Coordinates(xCoord, rad, 0);
-            point.x = point.x / maxSplineSize;
-            point.y = point.y / maxSplineSize;
-            point.z = point.z / maxSplineSize;
+            point.scale(1.0 / maxSplineSize);
 
             point.rotateX(i * angle).rotateY(yAngle).rotateZ(zAngle).rotateX(xAngle).
-                    translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(point.w);
+                    translate(0, 0, shift).project(SW, SH, Zf, Zb).normalize(point.getW());
 
-            g.drawLine((int) (prevPoint.x * maxSplineSize) + xImCenter, (int) (prevPoint.y * maxSplineSize) + yImCenter,
-                    (int) (point.x * maxSplineSize) + xImCenter, (int) (point.y * maxSplineSize) + yImCenter);
+            g.drawLine((int) (prevPoint.getX() * maxSplineSize) + xImCenter, (int) (prevPoint.getY() * maxSplineSize) + yImCenter,
+                    (int) (point.getX() * maxSplineSize) + xImCenter, (int) (point.getY() * maxSplineSize) + yImCenter);
             prevPoint = point;
         }
     }

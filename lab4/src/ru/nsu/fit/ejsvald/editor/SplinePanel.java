@@ -69,13 +69,13 @@ public class SplinePanel extends JPanel implements MouseListener, MouseMotionLis
 
         Spline spline = new Spline(points, approxNum);
         ArrayList<Coordinates> splinePoints = (ArrayList<Coordinates>) spline.calculateSpline();
-        int prevX = (int) splinePoints.get(0).x + xImCenter;
-        int prevY = (int) splinePoints.get(0).y + yImCenter;
+        int prevX = (int) splinePoints.get(0).getX() + xImCenter;
+        int prevY = (int) splinePoints.get(0).getY() + yImCenter;
         g.setColor(Color.RED);
 
         for (int k = 1; k < splinePoints.size(); k++) {
-            int x = (int) splinePoints.get(k).x + xImCenter;
-            int y = (int) splinePoints.get(k).y + yImCenter;
+            int x = (int) splinePoints.get(k).getX() + xImCenter;
+            int y = (int) splinePoints.get(k).getY() + yImCenter;
 
             g.setColor(Color.WHITE);
             g.drawLine(prevX, prevY, x, y);
@@ -91,15 +91,15 @@ public class SplinePanel extends JPanel implements MouseListener, MouseMotionLis
         Graphics2D g = image.createGraphics();
         g.setColor(Color.BLUE);
         Coordinates prevPoint = points.get(0);
-        int prevX = (int) prevPoint.x + xImCenter;
-        int prevY = (int) prevPoint.y + yImCenter;
+        int prevX = (int) prevPoint.getX() + xImCenter;
+        int prevY = (int) prevPoint.getY() + yImCenter;
         if (activePoint == 0) g.setColor(Color.RED);
         g.drawOval(prevX - BIG_POINT_RAD / 2, prevY - BIG_POINT_RAD / 2, BIG_POINT_RAD, BIG_POINT_RAD);
         g.setColor(Color.BLUE);
         for (int i = 1; i < points.size(); i++) {
             Coordinates point = points.get(i);
-            int x = (int) point.x + xImCenter;
-            int y = (int) point.y + yImCenter;
+            int x = (int) point.getX() + xImCenter;
+            int y = (int) point.getY() + yImCenter;
             if (i == activePoint) {
                 g.setColor(Color.RED);
             }
@@ -144,7 +144,7 @@ public class SplinePanel extends JPanel implements MouseListener, MouseMotionLis
             Coordinates point = points.get(i);
             if (isOverPoint(x, y, point, BIG_POINT_RAD)) {
                 pointPressed = true;
-                setActivePoint(i, (int)point.x, (int)point.y);
+                setActivePoint(i, (int)point.getX(), (int)point.getY());
             }
         }
         drawSpline();
@@ -210,9 +210,9 @@ public class SplinePanel extends JPanel implements MouseListener, MouseMotionLis
         } else {
             Coordinates point = points.get(activePoint);
             Coordinates nextPoint = points.get(activePoint + 1);
-            int dx = (int) nextPoint.x - (int) point.x;
-            int dy = (int) nextPoint.y - (int) point.y;
-            points.add(activePoint + 1, new Coordinates((int) point.x + dx / 2, (int) point.y + dy / 2, 0));
+            int dx = (int) nextPoint.getX() - (int) point.getX();
+            int dy = (int) nextPoint.getY() - (int) point.getY();
+            points.add(activePoint + 1, new Coordinates((int) point.getX() + dx / 2, (int) point.getY() + dy / 2, 0));
         }
         activePoint++;
     }
@@ -220,22 +220,22 @@ public class SplinePanel extends JPanel implements MouseListener, MouseMotionLis
     public void addPointAtEnd() {
         Coordinates lastPoint = points.get(points.size() - 1);
         Coordinates prevPoint = points.get(points.size() - 2);
-        int dx = (int) lastPoint.x - (int) prevPoint.x;
-        int dy = (int) lastPoint.y - (int) prevPoint.y;
-        points.add(new Coordinates((int) lastPoint.x + dx / 2, (int) lastPoint.y + dy / 2, 0));
+        int dx = (int) lastPoint.getX() - (int) prevPoint.getX();
+        int dy = (int) lastPoint.getY() - (int) prevPoint.getY();
+        points.add(new Coordinates((int) lastPoint.getX() + dx / 2, (int) lastPoint.getY() + dy / 2, 0));
     }
 
     private boolean isOverPoint(int x, int y, Coordinates point, int pointSize) {
-        return Math.abs(x - point.x) < pointSize && Math.abs(y - point.y) < pointSize;
+        return Math.abs(x - point.getX()) < pointSize && Math.abs(y - point.getY()) < pointSize;
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         if (pointPressed) {
             Coordinates point = points.get(activePoint);
-            point.x = (double) e.getX() - xImCenter;
-            point.y = (double) e.getY() - yImCenter;
-            setActivePoint(activePoint, (int) point.x, (int) point.y);
+            point.setX(e.getX() - xImCenter);
+            point.setY(e.getY() - yImCenter);
+            setActivePoint(activePoint, (int) point.getX(), (int) point.getY());
         } else {
             int xShift = e.getX() - xPressed;
             int yShift = e.getY() - yPressed;
@@ -255,8 +255,8 @@ public class SplinePanel extends JPanel implements MouseListener, MouseMotionLis
     }
 
     public void setPointCoordinates(int num, int x, int y) {
-        points.get(num).x = x;
-        points.get(num).y = y;
+        points.get(num).setX(x);
+        points.get(num).setY(y);
     }
 
     public int getActivePoint() {

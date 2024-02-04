@@ -35,8 +35,8 @@ public class Spline {
     }
 
     private ArrayList<Coordinates> calculateSplinePart(Coordinates p1, Coordinates p2, Coordinates p3, Coordinates p4) {
-        double[] xPoints = {p1.x, p2.x, p3.x, p4.x};
-        double[] yPoints = {p1.y, p2.y, p3.y, p4.y};
+        double[] xPoints = {p1.getX(), p2.getX(), p3.getX(), p4.getX()};
+        double[] yPoints = {p1.getY(), p2.getY(), p3.getY(), p4.getY()};
         ArrayList<Coordinates> toReturn = new ArrayList<>();
         double t = 0;
         double step = 1.0 / approxNum;
@@ -52,15 +52,15 @@ public class Spline {
     }
 
     public int calcMaxSplineSize() {
-        int xMax = (int) splinePoints.get(0).x;
-        int xMin = (int) splinePoints.get(0).x;
-        int yMax = (int) splinePoints.get(0).y;
-        int yMin = (int) splinePoints.get(0).y;
+        int xMax = (int) splinePoints.get(0).getX();
+        int xMin = (int) splinePoints.get(0).getX();
+        int yMax = (int) splinePoints.get(0).getY();
+        int yMin = (int) splinePoints.get(0).getY();
         for (Coordinates point : splinePoints) {
-            xMax = Math.max((int) point.x, xMax);
-            yMax = Math.max((int) point.y, yMax);
-            xMin = Math.min((int) point.x, xMin);
-            yMin = Math.min((int) point.y, yMin);
+            xMax = Math.max((int) point.getX(), xMax);
+            yMax = Math.max((int) point.getY(), yMax);
+            xMin = Math.min((int) point.getX(), xMin);
+            yMin = Math.min((int) point.getY(), yMin);
         }
         return Math.max(xMax - xMin, (yMax - yMin) * 2);
     }
